@@ -27,6 +27,31 @@ namespace TestDb.Controllers
             _bankDbContext = bankDbContext;
         }
 
+        [HttpGet("get1")]
+        public async Task<string> Get1()
+        {
+            var dbconnect = _aplloDbContext.Database.GetDbConnection();
+
+
+            BankDbContext bankDb = new BankDbContext(new DbContextOptionsBuilder<BankDbContext>().UseNpgsql(dbconnect).Options);
+
+
+            using (var transcation=await _aplloDbContext.Database.BeginTransactionAsync())
+            {
+
+                await _aplloDbContext.AddAsync(new TestApllo { Name = "2222撒大声地" });
+                await _aplloDbContext.SaveChangesAsync();
+                bankDb.Database.UseTransaction(transcation.GetDbTransaction());
+
+                await bankDb.AddAsync(new TestBank { Name="444444sdsd" });
+                await bankDb.SaveChangesAsync();
+
+                await transcation.CommitAsync();
+            }
+
+                return "2";
+        }
+
         [HttpGet]
         public async Task<string> Get()
         {
@@ -58,7 +83,7 @@ namespace TestDb.Controllers
             //    }
             //});
 
-       
+
 
             return "2222";
         }
